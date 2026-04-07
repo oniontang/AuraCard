@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref, watch, nextTick } from "vue";
 import {
   AiModelOption,
   AiProviderId,
@@ -40,7 +41,7 @@ import {
   cardDecorationStyle,
   cardFrameDecorStyle,
   cardOrnamentStyle,
-  cardRef,
+  cardRefs,
   cardStyle,
   cardTopMeta,
   cardTopMetaStyle,
@@ -68,6 +69,7 @@ import {
   isLightText,
   isSettingsCollapsed,
   isTestingAiConnection,
+  isAiChatCollapsed,
   localSummarizeToCard,
   newId,
   normalizeBaseUrl,
@@ -158,42 +160,67 @@ function renderMarkdown(raw: string) {
   })
   return html
 }
+
+const chatBodyRef = ref<HTMLElement | null>(null);
+
+watch(
+  () => [chatMessages.value, isChatLoading.value],
+  () => {
+    nextTick(() => {
+      if (chatBodyRef.value) {
+        chatBodyRef.value.scrollTop = chatBodyRef.value.scrollHeight;
+      }
+    });
+  },
+  { deep: true }
+);
+
 </script>
 
 <template>
-      <aside class="panel chat-panel">
-        <div class="chatTop">
-          <div class="chatTop__title">AI对话</div>
-        </div>
+  <aside class="panel chat-panel" :class="{ 'chat-panel--collapsed': isAiChatCollapsed }">
+    <div class="chatTop">
+      <div class="chatTop__title" v-show="!isAiChatCollapsed">AI对话</div>
+      <button class="collapse-toggle" @click="isAiChatCollapsed = !isAiChatCollapsed" :title="isAiChatCollapsed ? '展开AI助手' : '收起AI助手'">
+        <svg v-if="!isAiChatCollapsed" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        <svg v-else width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </button>
+    </div>
 
-        <div class="chatBody">
-          <div v-for="m in chatMessages" :key="m.id" class="bubble" :class="m.role === 'user' ? 'bubble--user' : 'bubble--ai'">
-            <div class="bubble__content" v-html="renderMarkdown(m.content)" />
-            <div v-if="m.role === 'assistant' && m.id !== 'welcome'" class="bubble__actions">
-              <button class="btn btn--ghost btn--sm" type="button" :disabled="isChatLoading" @click="aiSummarizeMessage(m.content)">
-                生成卡片
-              </button>
-            </div>
-          </div>
-
-          <div v-if="isChatLoading" class="chatTyping">AI 正在思考…</div>
-          <div v-if="chatError" class="chatToast">{{ chatError }}</div>
-        </div>
-
-        <div class="chatComposer">
-          <div class="chatComposer__inputWrap">
-            <textarea
-              v-model="chatInput"
-              class="chatComposer__input"
-              rows="1"
-              placeholder="输入想法，回车发送..."
-              :disabled="isChatLoading"
-              @keydown.enter.exact.prevent="sendChat"
-            />
-            <button class="chatComposer__send" type="button" :disabled="isChatLoading || !chatInput.trim()" @click="sendChat">
-              <svg class="chatComposer__sendIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+    <div class="chat-panel__inner" v-show="!isAiChatCollapsed">
+      <div class="chatBody" ref="chatBodyRef">
+        <div v-for="m in chatMessages" :key="m.id" class="bubble" :class="m.role === 'user' ? 'bubble--user' : 'bubble--ai'">
+          <div class="bubble__content" v-html="renderMarkdown(m.content)" />
+          <div v-if="m.role === 'assistant' && m.id !== 'welcome'" class="bubble__actions">
+            <button class="btn btn--ghost btn--sm" type="button" :disabled="isChatLoading" @click="aiSummarizeMessage(m.content)">
+              生成卡片
             </button>
           </div>
         </div>
-      </aside>
+
+        <div v-if="isChatLoading" class="chatTyping">AI 正在思考…</div>
+        <div v-if="chatError" class="chatToast">{{ chatError }}</div>
+      </div>
+
+      <div class="chatComposer">
+        <div class="chatComposer__inputWrap">
+          <textarea
+            v-model="chatInput"
+            class="chatComposer__input"
+            rows="1"
+            placeholder="输入想法，回车发送..."
+            :disabled="isChatLoading"
+            @keydown.enter.exact.prevent="sendChat"
+          />
+          <button class="chatComposer__send" type="button" :disabled="isChatLoading || !chatInput.trim()" @click="sendChat">
+            <svg class="chatComposer__sendIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div v-show="isAiChatCollapsed" class="chat-panel__collapsed-label" @click="isAiChatCollapsed = false">
+      <span class="chat-panel__collapsed-en">AI</span>
+      <span class="chat-panel__collapsed-zh">助手</span>
+    </div>
+  </aside>
 </template>

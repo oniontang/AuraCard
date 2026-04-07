@@ -1,66 +1,101 @@
 # 光语 (AuraCard)
 
-**光语**是一款专为内容创作者设计的 AI 图文卡片生成工具，让文字有光。它支持高度自定义的卡片样式和内置 AI 辅助生成功能，帮你将灵感、金句、通知转化为高颜值的极简图文排版。
+**光语**是一款 AI 图文卡片生成工具，支持卡片样式编辑、AI 聊天辅助写作、封面 AI 生图与导出。
 
-## 特性
+## 核心能力
 
-- **多模板支持**：提供多种预设模板（极简、通知、名言等），一键切换排版风格。
-- **自定义样式**：
-  - 支持调整背景颜色、文字颜色、高亮颜色。
-  - 多种背景模式：纯色、渐变色、网格、便利贴等。
-  - 自由调整圆角、边距、阴影和边框。
-  - 支持自定义背景图片。
-- **内容编辑**：支持顶部元信息（左右中）、主标题、正文内容和水印的自定义。
-- **AI 辅助创作**：
-  - 内置 AI 聊天面板，支持连接兼容 OpenAI Chat Completions 接口的模型。
-  - 提供多种默认 AI 供应商（如 Kimi, DeepSeek, 智谱清言, 硅基流动等）。
-  - 支持将 AI 对话内容一键生成为卡片内容（包括标题、正文和元信息）。
-- **组件化架构**：代码结构清晰，采用 Vue 3 Composition API 和按功能拆分的组件。
+- **卡片编辑与预览**：支持标题、正文、元信息、水印及样式实时调整
+- **多视图页面**：首页、卡片编辑页、封面编辑页分离
+- **AI 聊天辅助**：支持兼容 OpenAI Chat Completions 的接口
+- **封面 AI 创作**：
+  - 弹窗初始仅展示输入框
+  - 点击开始生成后，在输入框上方展示 loading 与生成结果
+  - 成功后自动应用到封面模板
+- **统一请求封装**：
+  - 统一 `request` 调用入口
+  - 统一错误处理、超时控制、查询参数与 JSON 序列化
+  - 预留 Token 存取能力（用于后续注册/登录）
 
-## 目录结构
+## 项目结构
 
-```
+```text
 src/
-├── components/          # Vue 组件
-│   ├── Topbar.vue       # 顶部导航栏，包含 AI 设置和导出按钮
-│   ├── LeftPanel.vue    # 左侧设置面板，控制卡片样式和内容
-│   ├── CenterPanel.vue  # 中间预览区域，实时展示卡片效果
-│   └── RightPanel.vue   # 右侧 AI 聊天面板，与 AI 交互并生成卡片
-├── store.ts             # 核心状态管理，集中管理响应式数据和业务逻辑
-├── App.vue              # 根组件，整合各面板
-├── App_style.css        # 全局样式
-├── main.ts              # 应用入口
+├── components/              # 业务组件
+├── views/                   # 页面视图（Home/Card/Cover）
+├── store/                   # 状态与业务逻辑拆分
+│   ├── ai.ts                # AI 聊天与生图逻辑
+│   ├── state.ts             # 核心响应式状态
+│   └── ...
+├── request.ts               # 公共请求封装（含 Token 管理）
+├── router.ts                # 路由配置
+├── App.vue
+└── App_style.css
 ```
 
-## 技术栈
+## 环境要求
 
-- **前端框架**：Vue 3 + Vite
-- **语言**：TypeScript
-- **图片导出**：`html-to-image`
+- Node.js 18+
+- npm 9+
 
-## 开发与运行
+## 本地开发
 
-1. 安装依赖：
+### 1) 启动后端服务（推荐先启动）
 
-   ```bash
-   npm install
-   ```
+在 `card-server` 目录完成 `.env` 配置并启动：
 
-2. 启动开发服务器：
+```bash
+cd ../card-server
+npm install
+npm run start:dev
+```
 
-   ```bash
-   npm run dev
-   ```
+后端默认地址：`http://127.0.0.1:3001`
 
-3. 类型检查与构建打包：
-   ```bash
-   npm run typecheck
-   npm run build
-   ```
+### 2) 启动前端
 
-## 组件化说明
+```bash
+npm install
+npm run dev
+```
 
-为了提高代码的可维护性，原本庞大的 `App.vue` 已被拆分为多个独立组件：
+### 3) 校验
 
-- **状态管理 (`store.ts`)**：将原先在 `App.vue` 中的所有状态、计算属性和方法提取到 `store.ts` 中，并使用 `export` 导出。通过 `initStore()` 方法初始化生命周期钩子（如 `watch`）。
-- **UI 组件**：根据页面布局拆分为 `Topbar`（顶栏）、`LeftPanel`（左侧设置）、`CenterPanel`（中间预览）和 `RightPanel`（右侧 AI 助手）。这些组件通过引入 `store.ts` 中的状态进行数据绑定和交互。
+```bash
+npm run typecheck
+npm run build
+```
+
+## 前端 API 约定
+
+- 开发环境通过 Vite 代理将 `/api` 转发到 `http://127.0.0.1:3001`
+- 默认 base URL 为 `/api`
+- 可通过环境变量覆盖：
+
+```bash
+VITE_API_BASE_URL=/api
+```
+
+## 请求封装说明
+
+公共请求文件：`src/request.ts`
+
+- 提供 `request<T>()` 统一调用入口
+- 支持：
+  - `params` 查询参数
+  - `data` JSON/body 发送
+  - `timeoutMs` 超时控制
+  - `requiresAuth` 自动携带 Token
+  - `token` 手动覆盖 Token
+- 内置 Token 工具：
+  - `getAccessToken()`
+  - `setAccessToken(token)`
+  - `clearAccessToken()`
+
+默认本地存储 key：`auth.accessToken`
+
+## 主要脚本
+
+- `npm run dev`：启动前端开发服务
+- `npm run typecheck`：TypeScript 类型检查
+- `npm run build`：构建打包
+- `npm run preview`：本地预览构建产物

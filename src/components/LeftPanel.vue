@@ -40,7 +40,7 @@ import {
   cardDecorationStyle,
   cardFrameDecorStyle,
   cardOrnamentStyle,
-  cardRef,
+  cardRefs,
   cardStyle,
   cardTopMeta,
   cardTopMetaStyle,
@@ -96,12 +96,14 @@ import {
   setBgFile,
   setChatError,
   showWatermark,
+  showSubtitle,
   subtitle,
   subtitleStyle,
   swapColors,
   syncAiProviderSettings,
   templates,
   testAiConnection,
+  textAlignment,
   textColor,
   title,
   titleStyle,
@@ -142,7 +144,7 @@ import {
 
           <div class="group">
             <div class="field">
-              <span class="group__title">比例</span>
+              <span class="group__title">卡片比例</span>
               <div class="segmented">
                 <button
                   v-for="a in aspectPresets"
@@ -191,13 +193,18 @@ import {
 
             <div v-show="bgTab === 'solid'">
               <div class="field">
-                <label class="colorPickerLight">
-                  <input class="colorPickerLight__native" type="color" v-model="background" />
-                  <span class="colorPickerLight__current">
+                <div class="colorPickerLight">
+                  <label class="colorPickerLight__native-wrapper">
+                    <input class="colorPickerLight__native" type="color" v-model="background" />
                     <span class="colorPickerLight__dot" :style="{ backgroundColor: background }" />
-                    <span>{{ background.toUpperCase() }}</span>
-                  </span>
-                </label>
+                  </label>
+                  <input 
+                    class="colorPickerLight__input" 
+                    type="text" 
+                    v-model="background" 
+                    @blur="() => { if (!/^#[0-9A-Fa-f]{6}$/i.test(background)) background = '#ffffff'; }"
+                  />
+                </div>
               </div>
               <div class="field">
                 <div class="colorSwatchesLight">
@@ -290,28 +297,75 @@ import {
             </div>
 
           <div class="group">
-            <div class="group__title">文字颜色</div>
+            <div class="group__title">文字设置</div>
             <div class="field" style="margin-top: 8px;">
-              <label class="colorPickerLight">
-                <input class="colorPickerLight__native" type="color" v-model="textColor" />
-                <span class="colorPickerLight__current">
+              <div class="colorPickerLight">
+                <label class="colorPickerLight__native-wrapper">
+                  <input class="colorPickerLight__native" type="color" v-model="textColor" />
                   <span class="colorPickerLight__dot" :style="{ backgroundColor: textColor }" />
-                  <span>{{ textColor.toUpperCase() }}</span>
-                </span>
-              </label>
-            </div>
-            <div class="field">
-              <div class="colorSwatchesLight">
-                <button
-                  v-for="sw in colorSwatches"
-                  :key="sw"
-                  class="colorSwatchesLight__btn"
-                  type="button"
-                  :style="{ backgroundColor: sw }"
-                  @click="textColor = sw"
+                </label>
+                <input 
+                  class="colorPickerLight__input" 
+                  type="text" 
+                  v-model="textColor" 
+                  @blur="() => { if (!/^#[0-9A-Fa-f]{6}$/i.test(textColor)) textColor = '#000000'; }"
                 />
               </div>
             </div>
+
+            <!-- 对齐方式选择 -->
+            <div class="field">
+              <div class="segmented segmented--4">
+                <button
+                  class="segmented__btn"
+                  :class="{ 'segmented__btn--active': textAlignment === 'left' }"
+                  @click="textAlignment = 'left'"
+                  title="左对齐"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 6H20M4 12H14M4 18H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+                <button
+                  class="segmented__btn"
+                  :class="{ 'segmented__btn--active': textAlignment === 'center' }"
+                  @click="textAlignment = 'center'"
+                  title="居中对齐"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 6H20M7 12H17M4 18H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+                <button
+                  class="segmented__btn"
+                  :class="{ 'segmented__btn--active': textAlignment === 'right' }"
+                  @click="textAlignment = 'right'"
+                  title="右对齐"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 6H20M10 12H20M4 18H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+                <button
+                  class="segmented__btn"
+                  :class="{ 'segmented__btn--active': textAlignment === 'justify' }"
+                  @click="textAlignment = 'justify'"
+                  title="两端对齐"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 6H20M4 12H20M4 18H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="group">
+            <div class="group__title">副标题</div>
+            <label class="watermark-switch">
+              <span class="watermark-switch__label">显示副标题</span>
+              <input v-model="showSubtitle" type="checkbox" />
+            </label>
           </div>
 
           <div class="group">
@@ -330,25 +384,8 @@ import {
             </div>
           </div>
         </div>
-
-        <div class="settings-preview" v-show="isSettingsCollapsed">
-          <div class="settings-preview__aspect settings-preview__item">{{ aspectId }}</div>
-          <div
-            class="settings-preview__thumb settings-preview__item"
-            :style="bgImageUrl ? { backgroundImage: `url(${bgImageUrl})` } : { background: backgroundCss }"
-          />
-          <div class="settings-preview__chip settings-preview__item">
-            <span class="settings-preview__dot" :style="{ backgroundColor: background }" />
-            <span class="settings-preview__text">背景</span>
-          </div>
-          <div class="settings-preview__chip settings-preview__item">
-            <span class="settings-preview__dot" :style="{ backgroundColor: textColor }" />
-            <span class="settings-preview__text">字体</span>
-          </div>
-          <div class="settings-preview__chip settings-preview__item">
-            <span class="settings-preview__dot" :style="{ backgroundColor: accent }" />
-            <span class="settings-preview__text">划重点</span>
-          </div>
-        </div>
       </aside>
 </template>
+
+<style scoped>
+</style>

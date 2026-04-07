@@ -1,140 +1,64 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { RouterLink } from 'vue-router'
 import {
-  AiModelOption,
-  AiProviderId,
-  AiProviderOption,
-  AspectId,
-  AspectPreset,
-  BgTab,
-  ChatMessage,
-  ChatRole,
-  TemplateConfig,
-  TemplateId,
-  accent,
-  activeAspect,
-  activeGradientNode,
   aiApiKey,
-  aiBaseUrl,
   aiModel,
   aiProvider,
   aiProviderOptions,
-  aiSummarizeLastAssistant,
   aiTestMessage,
   aiTestStatus,
-  aspectId,
-  aspectPresets,
   availableAiModels,
-  background,
-  backgroundCss,
-  bgFileInputRef,
-  bgImageName,
-  bgImageSizeText,
-  bgImageStyle,
-  bgImageUrl,
-  bgOpacity,
-  bgOpacityPercent,
-  bgTab,
-  callAiChat,
-  cardBodyStyle,
-  cardCanvasStyle,
-  cardDecorationStyle,
-  cardFrameDecorStyle,
-  cardOrnamentStyle,
-  cardRef,
-  cardStyle,
-  cardTopMeta,
-  cardTopMetaStyle,
-  chatEndpoint,
-  chatError,
-  chatInput,
-  chatMessages,
-  clearBgImage,
-  clearChat,
-  colorSwatches,
-  content,
   customAiBaseUrl,
-  downloadPng,
-  errorMessage,
-  formatBytes,
-  gradientAngle,
-  height,
-  hexToRgb,
-  initStore,
   isAiKeyVisible,
   isAiSettingsOpen,
-  isBgDragging,
-  isChatLoading,
   isCustomAiProvider,
-  isDownloading,
-  isLightText,
-  isSettingsCollapsed,
   isTestingAiConnection,
-  localSummarizeToCard,
-  newId,
-  normalizeBaseUrl,
-  onBgDragEnter,
-  onBgDragLeave,
-  onBgDrop,
-  onPickBgImage,
-  openBgPicker,
-  padding,
-  parseCardFromText,
-  previewFrameRef,
-  previewScale,
-  previewSize,
-  previewStageStyle,
-  radius,
-  relativeLuminance,
-  rotateGradient,
-  safeFilename,
-  scrimStyle,
   selectedAiProvider,
-  selectedTemplate,
-  selectedTemplateId,
-  sendChat,
-  setAiTestFeedback,
-  setBgFile,
-  setChatError,
-  showWatermark,
-  subtitle,
-  subtitleStyle,
-  swapColors,
-  syncAiProviderSettings,
-  templates,
   testAiConnection,
-  textColor,
-  title,
-  titleStyle,
-  updateActiveGradientColor,
-  watermark,
-  width
 } from '../store'
+
+const selectedAiModel = computed(() =>
+  availableAiModels.value.find((model) => model.value === aiModel.value) ?? null
+)
+
+const isImageModelSelected = computed(() =>
+  ['wan2.7-image-pro', 'qwen-image-2.0', 'z-image-turbo'].includes(
+    selectedAiModel.value?.value || ''
+  )
+)
 </script>
 
 <template>
-    <header class="topbar">
-      <div class="topbar__inner">
-        <div class="brand">
-          <img src="/logo.png" alt="光语" class="brand__logo" />
-          <div>
-            <div class="brand__title">光语</div>
-            <div class="brand__sub">让文字有光，高颜值图文排版</div>
-          </div>
+  <header class="globalHeader">
+    <div class="globalHeader__inner">
+      <RouterLink to="/" class="brand">
+        <img src="/logo.png" alt="光语" class="brand__logo" />
+        <div>
+          <div class="brand__title">光语</div>
+          <div class="brand__sub">现代简约的图文与封面生成工作台</div>
         </div>
-        <div class="topbar__actions">
-          <button class="primary" :disabled="isDownloading" @click="downloadPng">
-            {{ isDownloading ? '下载中…' : '下载卡片' }}
-          </button>
+      </RouterLink>
+      
+      <div class="globalHeader__actions">
+        <!-- 默认导航，如果不需要可以通过 slot 覆盖 -->
+        <slot name="nav">
+        </slot>
+
+        <!-- AI 设置弹窗：现在在所有页面可用 -->
+        <slot name="actions">
           <div class="chatTop__settings" :class="{ 'is-open': isAiSettingsOpen }">
-            <button class="chatTop__summary" @click="isAiSettingsOpen = !isAiSettingsOpen">
+            <button class="chatTop__summary btn btn--outline" @click="isAiSettingsOpen = !isAiSettingsOpen">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
               设置
             </button>
-            <div v-if="isAiSettingsOpen" class="chatTop__panel">
-              <button class="chatConfig__close" @click="isAiSettingsOpen = false">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-              </button>
+            
+            <!-- 弹出式配置面板 -->
+            <div class="chatTop__drawer" :class="{ 'is-open': isAiSettingsOpen }">
               <div class="chatConfig">
+                <button class="chatConfig__close" @click="isAiSettingsOpen = false">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
                 <section class="chatConfig__section">
                   <div class="chatConfig__head">
                     <div class="chatConfig__title">API 供应商</div>
@@ -196,7 +120,11 @@ import {
                   <label v-if="!isCustomAiProvider" class="chatConfig__field">
                     <div class="chatConfig__selectWrap">
                       <select v-model="aiModel" class="chatConfig__control chatConfig__control--select">
-                        <option v-for="model in availableAiModels" :key="model.value" :value="model.value">
+                        <option
+                          v-for="model in availableAiModels"
+                          :key="model.value"
+                          :value="model.value"
+                        >
                           {{ model.label }}
                         </option>
                       </select>
@@ -206,12 +134,100 @@ import {
                   <label v-else class="chatConfig__field">
                     <input v-model="aiModel" class="chatConfig__control" placeholder="输入模型名称，例如 gpt-4o-mini" />
                   </label>
+                  <div v-if="isImageModelSelected" class="chatConfig__tip">
+                    当前模型会用于封面 AI 创作与图片模型连接测试，不适用于聊天整理。
+                  </div>
                 </section>
               </div>
             </div>
           </div>
-        </div>
+        </slot>
       </div>
-    </header>
-
+    </div>
+  </header>
+  
+  <!-- 抽屉展开时的遮罩层 -->
+  <div v-if="isAiSettingsOpen" class="chatTop__overlay" @click="isAiSettingsOpen = false"></div>
 </template>
+
+<style scoped>
+.globalHeader {
+  display: flex;
+  justify-content: center;
+  padding: 16px 28px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 30; /* 提升层级，确保在 drawer 和 overlay 之上 */
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px) saturate(150%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+}
+
+.globalHeader__inner {
+  width: min(1440px, calc(100vw - 48px));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+.brand:hover {
+  transform: translateY(-1px);
+}
+
+.brand__logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.brand__title {
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: 0.3px;
+  line-height: 1.2;
+  color: var(--text);
+}
+
+.brand__sub {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+  font-weight: 500;
+}
+
+.globalHeader__actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+@media (max-width: 760px) {
+  .globalHeader__inner {
+    width: calc(100vw - 24px);
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .globalHeader__actions {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+  .brand__sub {
+    display: none;
+  }
+}
+</style>
