@@ -1,4 +1,8 @@
 import { watch, onBeforeUnmount, onMounted } from "vue";
+import { marked } from "marked";
+import { markedHighlight } from "marked-highlight";
+import hljs from "highlight.js";
+import "highlight.js/styles/atom-one-dark.css";
 import {
   aspectId,
   height,
@@ -20,6 +24,9 @@ import {
   isCustomAiProvider,
   aiTestMessage,
   aiTestStatus,
+  isMobile,
+  isSettingsCollapsed,
+  isAiChatCollapsed,
 } from "./state";
 import { templates, aiProviderOptions } from "./config";
 import { syncAiProviderSettings } from "./ai";
@@ -37,7 +44,34 @@ export * from "./ai";
 export * from "./export";
 
 export function initStore() {
+  // 全局一次性初始化 marked（避免每个 CardPreview 实例重复注册）
+  marked.use(
+    markedHighlight({
+      langPrefix: "hljs language-",
+      highlight(code, lang) {
+        const language = hljs.getLanguage(lang) ? lang : "plaintext";
+        return hljs.highlight(code, { language }).value;
+      },
+    }),
+  );
+  marked.use({ breaks: true });
+
   initSplit();
+
+  // 移动端窗口尺寸监听
+  const onResize = () => {
+    isMobile.value = window.innerWidth < 768;
+  };
+  window.addEventListener("resize", onResize);
+  onBeforeUnmount(() => window.removeEventListener("resize", onResize));
+
+  // 移动端下强制展开面板（折叠无意义）
+  watch(isMobile, (mobile) => {
+    if (mobile) {
+      isSettingsCollapsed.value = false;
+      isAiChatCollapsed.value = false;
+    }
+  });
 
   watch(
     () => aspectId.value,
@@ -67,19 +101,33 @@ export function initStore() {
     },
   );
 
-  onMounted(() => {
-    const el = previewFrameRef.value;
-    if (!el) return;
-    const ro = new ResizeObserver((entries) => {
-      const entry = entries[0];
-      if (!entry) return;
-      previewSize.value = {
-        width: entry.contentRect.width,
-        height: entry.contentRect.height,
-      };
-    });
-    ro.observe(el);
-    onBeforeUnmount(() => ro.disconnect());
+  let ro: ResizeObserver | null = null;
+
+  watch(
+    () => previewFrameRef.value,
+    (el) => {
+      if (ro) {
+        ro.disconnect();
+        ro = null;
+      }
+      if (!el) return;
+      ro = new ResizeObserver((entries) => {
+        const entry = entries[0];
+        if (!entry) return;
+        previewSize.value = {
+          width: entry.contentRect.width,
+          height: entry.contentRect.height,
+        };
+      });
+      ro.observe(el);
+    },
+  );
+
+  onBeforeUnmount(() => {
+    if (ro) {
+      ro.disconnect();
+      ro = null;
+    }
   });
 
   // We no longer observe stageSize to avoid ResizeObserver loop scroll bugs

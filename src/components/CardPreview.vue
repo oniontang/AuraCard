@@ -1,9 +1,6 @@
 <script setup lang="ts">
 import { ref, nextTick, onMounted, onBeforeUnmount } from 'vue';
 import { marked } from 'marked';
-import { markedHighlight } from 'marked-highlight';
-import hljs from 'highlight.js';
-import 'highlight.js/styles/atom-one-dark.css';
 
 import {
   cardRefs,
@@ -49,18 +46,6 @@ onBeforeUnmount(() => {
   if (cardRef.value) {
     cardRefs.value = cardRefs.value.filter((node) => node !== cardRef.value);
   }
-});
-
-marked.use(markedHighlight({
-  langPrefix: 'hljs language-',
-  highlight(code, lang) {
-    const language = hljs.getLanguage(lang) ? lang : 'plaintext';
-    return hljs.highlight(code, { language }).value;
-  }
-}));
-
-marked.use({
-  breaks: true
 });
 
 const renderMarkdown = (text: string) => {

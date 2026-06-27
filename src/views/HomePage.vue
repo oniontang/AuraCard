@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import GlobalHeader from '../components/GlobalHeader.vue'
+import { isMobile } from '../store'
 </script>
 
 <template>
   <div class="page app-shell view-home">
-    <GlobalHeader />
+    <GlobalHeader :compact="isMobile" />
 
     <main class="landing">
       <section class="landingHero panel">

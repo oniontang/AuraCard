@@ -1,38 +1,85 @@
+/* ============================================
+   光语 (AuraCard) — 统一设计 Token 系统
+   ============================================ */
+
 :root {
-  color-scheme: light;
-  font-family:
-    "SF Pro Display",
-    "Inter",
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    Helvetica,
-    Arial,
-    sans-serif;
+  /* ---- 品牌色 ---- */
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
+  --primary-light: rgba(79, 70, 229, 0.1);
+  --primary-ring: rgba(79, 70, 229, 0.2);
+
+  /* ---- 中性色 ---- */
   --bg0: #f4f4f5;
   --bg1: #e0e7ff;
   --bg2: #fae8ff;
-  --surface: rgba(255, 255, 255, 0.75);
-  --surface-strong: rgba(255, 255, 255, 0.9);
+  --surface: rgba(255, 255, 255, 0.65);
+  --surface-strong: rgba(255, 255, 255, 0.88);
+  --surface-solid: #ffffff;
   --border: rgba(0, 0, 0, 0.06);
   --border-strong: rgba(0, 0, 0, 0.12);
   --text: #18181b;
   --muted: #52525b;
   --muted2: #a1a1aa;
-  --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.03);
-  --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.08);
-  --ring: 0 0 0 3px rgba(99, 102, 241, 0.2);
-  --ring-border: rgba(99, 102, 241, 0.5);
+
+  /* ---- 语义色 ---- */
+  --success: #10b981;
+  --success-light: rgba(16, 185, 129, 0.1);
+  --danger: #ef4444;
+  --danger-light: rgba(239, 68, 68, 0.1);
+  --danger-text: #b91c1c;
+  --warning: #f59e0b;
+
+  /* ---- 阴影 ---- */
+  --shadow-xs: 0 1px 4px rgba(0, 0, 0, 0.02);
+  --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 8px 28px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 30px 72px rgba(0, 0, 0, 0.14);
+
+  /* ---- 圆角 ---- */
+  --radius-xs: 6px;
   --radius-sm: 10px;
   --radius-md: 14px;
   --radius-lg: 20px;
-  --primary: #4f46e5;
-  --primary-hover: #4338ca;
+  --radius-xl: 28px;
+
+  /* ---- 间距 ---- */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 24px;
+  --space-2xl: 32px;
+
+  /* ---- 毛玻璃 ---- */
+  --glass-bg: rgba(255, 255, 255, 0.65);
+  --glass-border: rgba(255, 255, 255, 0.8);
+  --glass-blur: blur(18px) saturate(160%);
+  --glass-shadow: 0 4px 28px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+
+  /* ---- Header ---- */
+  --header-height: 68px;
+  --header-bg: rgba(255, 255, 255, 0.7);
+  --header-blur: blur(18px) saturate(160%);
+  --header-border: 1px solid rgba(255, 255, 255, 0.8);
+  --header-shadow: 0 2px 24px rgba(0, 0, 0, 0.04);
+
+  /* ---- 布局 ---- */
+  --content-max-width: 1200px;
+
+  /* ---- 排版 ---- */
+  --font-sans: "SF Pro Display", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+
+  color-scheme: light;
+  font-family: var(--font-sans);
 }
 
-* {
+/* ---- Reset ---- */
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
@@ -48,6 +95,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* ---- 滚动条 ---- */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -63,13 +111,187 @@ body {
   background: rgba(0, 0, 0, 0.25);
 }
 
-button,
-input,
-select,
-textarea {
+/* ---- 表单继承 ---- */
+button, input, select, textarea {
   font: inherit;
 }
 
 ::selection {
-  background: rgba(79, 70, 229, 0.2);
+  background: var(--primary-light);
+}
+
+/* ---- 通用按钮 Base ---- */
+button {
+  border: 0;
+  border-radius: var(--radius-md);
+  padding: 10px 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  text-decoration: none;
+}
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* ---- 按钮变体 ---- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  border-radius: var(--radius-sm);
+  padding: 8px 16px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text);
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.btn--primary,
+.primary {
+  background: linear-gradient(135deg, var(--primary), #6366f1);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(79, 70, 229, 0.3);
+}
+.btn--primary:hover:not(:disabled),
+.primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(79, 70, 229, 0.4);
+}
+.btn--primary:active:not(:disabled),
+.primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn--outline {
+  border-color: rgba(79, 70, 229, 0.25);
+  background: var(--primary-light);
+  color: #3730a3;
+}
+.btn--outline:hover {
+  background: rgba(79, 70, 229, 0.16);
+}
+
+.btn--ghost {
+  border-color: var(--border);
+  background: var(--surface);
+}
+.btn--ghost:hover {
+  background: var(--surface-solid);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-xs);
+}
+.btn--ghost.is-active {
+  background: var(--primary-light);
+  color: var(--primary);
+  border-color: var(--primary-ring);
+  font-weight: 700;
+}
+
+.btn--danger {
+  border-color: rgba(239, 68, 68, 0.3);
+  background: var(--danger-light);
+  color: var(--danger-text);
+}
+.btn--danger:hover {
+  background: rgba(239, 68, 68, 0.16);
+  border-color: rgba(239, 68, 68, 0.45);
+}
+
+.btn--sm {
+  padding: 4px 10px;
+  font-size: 11px;
+  border-radius: var(--radius-xs);
+}
+
+/* ---- 通用面板 ---- */
+.panel {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+}
+
+/* ---- 错误提示 ---- */
+.error {
+  color: var(--danger-text);
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* ---- 隐藏辅助类 ---- */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  clip: rect(0 0 0 0);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* ---- 动画 ---- */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(30px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ---- Range input ---- */
+.range {
+  width: 140px;
+  appearance: none;
+  height: 26px;
+  background: transparent;
+}
+.range:disabled { opacity: 0.5; }
+.range::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.08);
+}
+.range::-webkit-slider-thumb {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: #fff;
+  border: 2px solid var(--primary);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+  margin-top: -7px;
+  cursor: grab;
+  transition: transform 150ms ease;
+}
+.range::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+}
+
+/* ---- Opacity control ---- */
+.opacity {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  align-items: center;
+  gap: var(--space-md);
+}
+.opacity__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
 }

@@ -18,6 +18,10 @@ import {
   testAiConnection,
 } from '../store'
 
+const props = defineProps<{
+  compact?: boolean;
+}>();
+
 const selectedAiModel = computed(() =>
   availableAiModels.value.find((model) => model.value === aiModel.value) ?? null
 )
@@ -36,7 +40,7 @@ const isImageModelSelected = computed(() =>
         <img src="/logo.png" alt="光语" class="brand__logo" />
         <div>
           <div class="brand__title">光语</div>
-          <div class="brand__sub">现代简约的图文与封面生成工作台</div>
+          <div v-if="!compact" class="brand__sub">现代简约的图文与封面生成工作台</div>
         </div>
       </RouterLink>
       
@@ -153,31 +157,34 @@ const isImageModelSelected = computed(() =>
 <style scoped>
 .globalHeader {
   display: flex;
+  align-items: center;
   justify-content: center;
-  padding: 16px 28px;
+  padding: 0 28px;
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  z-index: 30; /* 提升层级，确保在 drawer 和 overlay 之上 */
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(20px) saturate(150%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.8);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+  height: var(--header-height);
+  z-index: 40;
+  background: var(--header-bg);
+  backdrop-filter: var(--header-blur);
+  -webkit-backdrop-filter: var(--header-blur);
+  border-bottom: var(--header-border);
+  box-shadow: var(--header-shadow);
 }
 
 .globalHeader__inner {
-  width: min(1440px, calc(100vw - 48px));
+  width: min(var(--content-max-width), calc(100vw - var(--space-2xl)));
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: var(--space-lg);
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-md);
   text-decoration: none;
   cursor: pointer;
   transition: transform 0.2s ease;
@@ -189,7 +196,7 @@ const isImageModelSelected = computed(() =>
 .brand__logo {
   width: 36px;
   height: 36px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   object-fit: cover;
 }
 
@@ -211,23 +218,42 @@ const isImageModelSelected = computed(() =>
 .globalHeader__actions {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: var(--space-lg);
 }
 
-@media (max-width: 760px) {
+@media (max-width: 767px) {
+  .globalHeader {
+    height: 52px;
+    padding: 0 var(--space-lg);
+  }
+
   .globalHeader__inner {
-    width: calc(100vw - 24px);
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .globalHeader__actions {
     width: 100%;
-    justify-content: flex-start;
-    flex-wrap: wrap;
-    margin-top: 8px;
+    gap: var(--space-sm);
   }
+
+  .brand__logo {
+    width: 30px;
+    height: 30px;
+    border-radius: var(--radius-xs);
+  }
+
+  .brand__title {
+    font-size: 16px;
+  }
+
   .brand__sub {
     display: none;
+  }
+
+  .globalHeader__actions {
+    gap: var(--space-sm);
+  }
+
+  /* 移动端 AI 设置按钮缩小 */
+  .chatTop__summary {
+    font-size: 12px;
+    padding: 6px 12px;
   }
 }
 </style>

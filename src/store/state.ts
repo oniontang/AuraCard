@@ -60,6 +60,10 @@ export const isDownloading = ref(false);
 export const errorMessage = ref<string | null>(null);
 export const isSettingsCollapsed = ref(false);
 
+// ---- 移动端适配 ----
+export const isMobile = ref(window.innerWidth < 768);
+export const mobileTab = ref<"settings" | "preview" | "chat">("preview");
+
 export const chatMessages = ref<ChatMessage[]>([
   {
     id: "welcome",

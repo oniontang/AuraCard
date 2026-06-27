@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { toPng } from 'html-to-image'
-import { aiProvider, generateAiImageUrl, selectedAiModel, safeFilename } from '../store'
+import { aiProvider, generateAiImageUrl, selectedAiModel, safeFilename, isMobile } from '../store'
 import GlobalHeader from '../components/GlobalHeader.vue'
 
 type CoverTemplate = {
@@ -240,7 +240,7 @@ const downloadCover = async () => {
 
 <template>
   <div class="page app-shell view-cover">
-    <GlobalHeader />
+    <GlobalHeader :compact="isMobile" />
 
     <main class="coverLayout">
       <section class="coverStage panel">

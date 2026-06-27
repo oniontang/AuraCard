@@ -66,7 +66,12 @@ function isAbsoluteUrl(value: string) {
 
 function getStorage() {
   if (typeof window === "undefined") return null;
-  return window.localStorage;
+  try {
+    return window.localStorage;
+  } catch {
+    // Safari 隐私模式或浏览器禁用存储时会抛出 SecurityError
+    return null;
+  }
 }
 
 export function getAccessToken() {
