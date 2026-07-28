@@ -23,8 +23,8 @@ export const width = computed(() =>
   Math.round((height.value * activeAspect.value.w) / activeAspect.value.h),
 );
 
-export const title = ref("把想法做成图文卡片");
-export const subtitle = ref("极简 · 可导出 PNG");
+export const title = ref("把文字做成光");
+export const subtitle = ref("可导出 PNG");
 export const content = ref("输入文字、选择模板、上传图片，然后一键下载。");
 export const watermark = ref("— 光语 —");
 export const showWatermark = ref(true);
@@ -68,7 +68,7 @@ export const chatMessages = ref<ChatMessage[]>([
   {
     id: "welcome",
     role: "assistant",
-    content: "把你的想法发给我，我会先和你聊清楚，然后帮你整理成图文卡片～",
+    content: "把你的想法发给我，我会帮你整理成适合视觉表达的图文内容～",
     createdAt: Date.now(),
   },
 ]);

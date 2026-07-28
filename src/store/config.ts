@@ -54,6 +54,7 @@ export const aiProviderOptions: AiProviderOption[] = [
       { value: "gpt-4o", label: "gpt-4o", kind: "text" },
       { value: "gpt-4.1-mini", label: "gpt-4.1-mini", kind: "text" },
       { value: "gpt-4.1", label: "gpt-4.1", kind: "text" },
+      { value: "gpt-image2", label: "图片生成 · gpt-image2", kind: "image" },
     ],
   },
   {

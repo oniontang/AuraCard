@@ -111,17 +111,24 @@ import {
   watermark,
   width
 } from '../store'
+import UiPanelIntro from './ui/UiPanelIntro.vue'
 </script>
 
 <template>
       <aside class="panel settings-panel" :class="{ 'settings-panel--collapsed': isSettingsCollapsed }">
-        <div class="panel__header">
-          <h2 class="panel__title" v-show="!isSettingsCollapsed">卡片设置</h2>
+        <div v-if="isSettingsCollapsed" class="panel__header">
           <button class="collapse-toggle" @click="isSettingsCollapsed = !isSettingsCollapsed" :title="isSettingsCollapsed ? '展开' : '折叠'">
-            <svg v-if="!isSettingsCollapsed" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-            <svg v-else width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
           </button>
         </div>
+        <UiPanelIntro v-else title="卡片设置">
+          <template #actions>
+            <button class="collapse-toggle" @click="isSettingsCollapsed = !isSettingsCollapsed" :title="isSettingsCollapsed ? '展开' : '折叠'">
+              <svg v-if="!isSettingsCollapsed" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+              <svg v-else width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+          </template>
+        </UiPanelIntro>
         
         <div class="settings-content" v-show="!isSettingsCollapsed">
           <div class="group">

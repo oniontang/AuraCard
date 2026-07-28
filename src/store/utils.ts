@@ -1,3 +1,28 @@
+import DOMPurify from 'dompurify'
+
+/**
+ * 净化 HTML 字符串，防止 XSS 攻击。
+ * 允许常见的 Markdown 渲染标签（p, h1-h3, ul, ol, li, pre, code, blockquote, a, strong, em, table 等），
+ * 移除所有事件处理器、javascript: 协议和危险的 DOM 操作属性。
+ */
+const SANITIZE_CONFIG: DOMPurify.Config = {
+  ALLOWED_TAGS: [
+    'p', 'br', 'hr', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+    'ul', 'ol', 'li', 'pre', 'code', 'blockquote',
+    'a', 'strong', 'em', 'del', 's', 'mark', 'sub', 'sup',
+    'table', 'thead', 'tbody', 'tr', 'th', 'td',
+    'img', 'span', 'div', 'section', 'del',
+  ],
+  ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'class', 'target', 'rel', 'width', 'height'],
+  ALLOW_DATA_ATTR: false,
+  FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'style'],
+  FORBID_TAGS: ['script', 'iframe', 'object', 'embed', 'form', 'input', 'textarea', 'button'],
+}
+
+export function sanitizeHtml(dirty: string): string {
+  return DOMPurify.sanitize(dirty, SANITIZE_CONFIG) as string
+}
+
 export function hexToRgb(hex: string) {
   const normalized = hex.trim().toLowerCase();
   const m = normalized.match(/^#([0-9a-f]{6})$/);

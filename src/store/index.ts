@@ -7,6 +7,12 @@ import {
   aspectId,
   height,
   selectedTemplateId,
+  title,
+  subtitle,
+  content,
+  watermark,
+  showWatermark,
+  showSubtitle,
   background,
   textColor,
   textAlignment,
@@ -14,6 +20,13 @@ import {
   radius,
   padding,
   bgTab,
+  activeGradientNode,
+  gradientAngle,
+  bgImageUrl,
+  bgImageName,
+  bgImageSizeText,
+  bgOpacityPercent,
+  errorMessage,
   previewFrameRef,
   previewSize,
   aiProvider,
@@ -42,6 +55,36 @@ export * from "./background";
 export * from "./styles";
 export * from "./ai";
 export * from "./export";
+
+export function resetCardToInitialState() {
+  selectedTemplateId.value = "A";
+  aspectId.value = "3:4";
+  height.value = 600;
+
+  title.value = "把文字做成光";
+  subtitle.value = "可导出 PNG";
+  content.value = "输入文字、选择模板、上传图片，然后一键下载。";
+  watermark.value = "— 光语 —";
+  showWatermark.value = true;
+  showSubtitle.value = true;
+
+  const template = templates.find((item) => item.id === "A") ?? templates[0];
+  background.value = template.defaultBackground;
+  textColor.value = template.defaultText;
+  textAlignment.value = template.alignment;
+  accent.value = template.defaultAccent;
+  radius.value = template.defaultRadius;
+  padding.value = template.defaultPadding;
+
+  bgTab.value = template.backgroundMode === "gradient" ? "gradient" : "solid";
+  activeGradientNode.value = "background";
+  gradientAngle.value = 135;
+  bgImageUrl.value = null;
+  bgImageName.value = null;
+  bgImageSizeText.value = null;
+  bgOpacityPercent.value = 60;
+  errorMessage.value = null;
+}
 
 export function initStore() {
   // 全局一次性初始化 marked（避免每个 CardPreview 实例重复注册）
@@ -145,7 +188,8 @@ export function initStore() {
       localStorage.getItem("ai.customBaseUrl") || "https://api.openai.com";
     aiBaseUrl.value = localStorage.getItem("ai.baseUrl") || "";
     aiModel.value = localStorage.getItem("ai.model") || "";
-    aiApiKey.value = localStorage.getItem("ai.apiKey") || "";
+    // API Key 由服务端统一管理，不再持久化到客户端 localStorage
+    // 避免 XSS 泄露风险。所有 AI 调用均通过后端 /api/ai/* 代理。
 
     syncAiProviderSettings(aiProvider.value, true);
   });
@@ -176,10 +220,5 @@ export function initStore() {
   watch(
     () => aiModel.value,
     (v: string) => localStorage.setItem("ai.model", v || ""),
-  );
-
-  watch(
-    () => aiApiKey.value,
-    (v: string) => localStorage.setItem("ai.apiKey", v || ""),
   );
 }

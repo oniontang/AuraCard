@@ -108,8 +108,10 @@ import {
   titleStyle,
   updateActiveGradientColor,
   watermark,
-  width
+  width,
+  sanitizeHtml,
 } from '../store'
+import UiNotice from './ui/UiNotice.vue'
 
 function escapeHtml(text: string) {
   return text
@@ -158,10 +160,11 @@ function renderMarkdown(raw: string) {
   blockMap.forEach((value, key) => {
     html = html.replace(key, value)
   })
-  return html
+  return sanitizeHtml(html)
 }
 
 const chatBodyRef = ref<HTMLElement | null>(null);
+const chatInputRef = ref<HTMLTextAreaElement | null>(null);
 
 watch(
   () => [chatMessages.value, isChatLoading.value],
@@ -174,6 +177,24 @@ watch(
   },
   { deep: true }
 );
+
+function autoResize() {
+  const el = chatInputRef.value;
+  if (!el) return;
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 140) + 'px';
+}
+
+function onKeydown(e: KeyboardEvent) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendChat();
+  }
+}
+
+watch(chatInput, () => {
+  nextTick(autoResize);
+});
 
 </script>
 
@@ -198,23 +219,37 @@ watch(
           </div>
         </div>
 
-        <div v-if="isChatLoading" class="chatTyping">AI 正在思考…</div>
-        <div v-if="chatError" class="chatToast">{{ chatError }}</div>
+        <UiNotice v-if="isChatLoading" message="AI 正在思考…" tone="processing" />
+        <UiNotice :message="chatError ?? ''" tone="error" />
       </div>
 
       <div class="chatComposer">
         <div class="chatComposer__inputWrap">
           <textarea
+            ref="chatInputRef"
             v-model="chatInput"
             class="chatComposer__input"
             rows="1"
-            placeholder="输入想法，回车发送..."
+            placeholder="输入想法，Shift+Enter 换行，Enter 发送"
             :disabled="isChatLoading"
-            @keydown.enter.exact.prevent="sendChat"
+            @keydown="onKeydown"
+            @input="autoResize"
           />
-          <button class="chatComposer__send" type="button" :disabled="isChatLoading || !chatInput.trim()" @click="sendChat">
-            <svg class="chatComposer__sendIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+          <button
+            class="chatComposer__send"
+            type="button"
+            :disabled="isChatLoading || !chatInput.trim()"
+            @click="sendChat"
+          >
+            <svg class="chatComposer__sendIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
           </button>
+        </div>
+        <div class="chatComposer__hint">
+          <span v-if="chatInput.trim()">Shift + Enter 换行</span>
+          <span v-else>试试让 AI 帮你整理图文内容</span>
         </div>
       </div>
     </div>

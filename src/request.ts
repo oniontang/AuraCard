@@ -260,6 +260,13 @@ export async function request<T>(
     });
     const payload = await parseResponseBody(response);
 
+    if (response.status === 401) {
+      clearAccessToken();
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("auth:unauthorized"));
+      }
+    }
+
     if (!response.ok) {
       throw toRequestError(response.status, payload);
     }
